@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:camunda="http://activiti.org/bpmn" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd" id="_-XkjkMGzEeSY2PGDrjkMzg" exporter="camunda modeler" exporterVersion="2.7.0" targetNamespace="http://activiti.org/bpmn">
+  <bpmn2:process id="CloudIncidentManagementWorkflow" name="Cloud Incident Management Workflow" isExecutable="true">
+    <bpmn2:startEvent id="IncidentManagementStart" camunda:async="true" name="Incident Management Start">
+      <bpmn2:outgoing>SequenceFlow_1</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    <bpmn2:serviceTask id="RunAutomationJob" camunda:class="watchtower.workflow.camunda.RunAutomationJobDelegate" name="Run Automation Job">
+      <bpmn2:incoming>SequenceFlow_1</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
+    </bpmn2:serviceTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_1" name="" sourceRef="IncidentManagementStart" targetRef="RunAutomationJob"/>
+    <bpmn2:endEvent id="IncidentManagementEnd" name="Incident Management End">
+      <bpmn2:incoming>SequenceFlow_2</bpmn2:incoming>
+    </bpmn2:endEvent>
+    <bpmn2:sequenceFlow id="SequenceFlow_2" name="" sourceRef="RunAutomationJob" targetRef="IncidentManagementEnd"/>
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="CloudIncidentManagementWorkflow">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_6" bpmnElement="IncidentManagementStart">
+        <dc:Bounds height="36.0" width="36.0" x="133.0" y="264.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="0.0" width="0.0" x="151.0" y="305.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_ServiceTask_2" bpmnElement="RunAutomationJob">
+        <dc:Bounds height="80.0" width="100.0" x="219.0" y="242.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_1" bpmnElement="SequenceFlow_1" sourceElement="_BPMNShape_StartEvent_6" targetElement="_BPMNShape_ServiceTask_2">
+        <di:waypoint xsi:type="dc:Point" x="169.0" y="282.0"/>
+        <di:waypoint xsi:type="dc:Point" x="219.0" y="282.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_EndEvent_3" bpmnElement="IncidentManagementEnd">
+        <dc:Bounds height="36.0" width="36.0" x="369.0" y="264.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_2" bpmnElement="SequenceFlow_2" sourceElement="_BPMNShape_ServiceTask_2" targetElement="_BPMNShape_EndEvent_3">
+        <di:waypoint xsi:type="dc:Point" x="319.0" y="282.0"/>
+        <di:waypoint xsi:type="dc:Point" x="369.0" y="282.0"/>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>
