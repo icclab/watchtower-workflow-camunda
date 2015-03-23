@@ -4,37 +4,112 @@
     <bpmn2:startEvent id="IncidentManagementStart" camunda:async="true" name="Incident Management Start">
       <bpmn2:outgoing>SequenceFlow_1</bpmn2:outgoing>
     </bpmn2:startEvent>
-    <bpmn2:serviceTask id="RunAutomationJob" camunda:class="watchtower.workflow.camunda.RunAutomationJobDelegate" name="Run Automation Job">
-      <bpmn2:incoming>SequenceFlow_1</bpmn2:incoming>
+    <bpmn2:exclusiveGateway id="ExclusiveGateway_2">
+      <bpmn2:incoming>SequenceFlow_4</bpmn2:incoming>
+      <bpmn2:outgoing>WithoutAutomationJob</bpmn2:outgoing>
+      <bpmn2:outgoing>WithAutomationJob</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:serviceTask id="RunAutomationJob" camunda:class="watchtower.workflow.camunda.delegate.RunAutomationJobDelegate" name="Run Automation Job">
+      <bpmn2:incoming>WithAutomationJob</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
     </bpmn2:serviceTask>
-    <bpmn2:sequenceFlow id="SequenceFlow_1" name="" sourceRef="IncidentManagementStart" targetRef="RunAutomationJob"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_2" name="" sourceRef="RunAutomationJob" targetRef="IncidentManagementEnd"/>
+    <bpmn2:sequenceFlow id="WithoutAutomationJob" name="Without Automation Job" sourceRef="ExclusiveGateway_2" targetRef="UserTask_2">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression">${hasJobs == false}</bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="WithAutomationJob" name="With Automation Job" sourceRef="ExclusiveGateway_2" targetRef="RunAutomationJob">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression">${hasJobs == true}</bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:userTask id="UserTask_2">
+      <bpmn2:incoming>WithoutAutomationJob</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_15</bpmn2:outgoing>
+    </bpmn2:userTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_15" name="" sourceRef="UserTask_2" targetRef="IncidentManagementEnd"/>
     <bpmn2:endEvent id="IncidentManagementEnd" name="Incident Management End">
       <bpmn2:incoming>SequenceFlow_2</bpmn2:incoming>
+      <bpmn2:incoming>SequenceFlow_15</bpmn2:incoming>
     </bpmn2:endEvent>
-    <bpmn2:sequenceFlow id="SequenceFlow_2" name="" sourceRef="RunAutomationJob" targetRef="IncidentManagementEnd"/>
+    <bpmn2:serviceTask id="PersistIncident" camunda:class="watchtower.workflow.camunda.delegate.PersistIncidentDelegate" name="Persist Incident">
+      <bpmn2:incoming>SequenceFlow_1</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_3</bpmn2:outgoing>
+    </bpmn2:serviceTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_1" name="" sourceRef="IncidentManagementStart" targetRef="PersistIncident"/>
+    <bpmn2:serviceTask id="AnalyzeIncident" camunda:class="watchtower.workflow.camunda.delegate.AnalyseIncidentDelegate" name="Analyse Incident">
+      <bpmn2:incoming>SequenceFlow_3</bpmn2:incoming>
+      <bpmn2:outgoing>SequenceFlow_4</bpmn2:outgoing>
+    </bpmn2:serviceTask>
+    <bpmn2:sequenceFlow id="SequenceFlow_3" name="" sourceRef="PersistIncident" targetRef="AnalyzeIncident"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_4" name="" sourceRef="AnalyzeIncident" targetRef="ExclusiveGateway_2"/>
   </bpmn2:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="CloudIncidentManagementWorkflow">
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_6" bpmnElement="IncidentManagementStart">
-        <dc:Bounds height="36.0" width="36.0" x="133.0" y="264.0"/>
+        <dc:Bounds height="36.0" width="36.0" x="96.0" y="282.0"/>
         <bpmndi:BPMNLabel>
-          <dc:Bounds height="0.0" width="0.0" x="151.0" y="305.0"/>
+          <dc:Bounds height="17.0" width="132.0" x="48.0" y="323.0"/>
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="_BPMNShape_ServiceTask_2" bpmnElement="RunAutomationJob">
-        <dc:Bounds height="80.0" width="100.0" x="219.0" y="242.0"/>
+        <dc:Bounds height="80.0" width="100.0" x="564.0" y="181.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_1" bpmnElement="SequenceFlow_1" sourceElement="_BPMNShape_StartEvent_6" targetElement="_BPMNShape_ServiceTask_2">
-        <di:waypoint xsi:type="dc:Point" x="169.0" y="282.0"/>
-        <di:waypoint xsi:type="dc:Point" x="219.0" y="282.0"/>
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_EndEvent_3" bpmnElement="IncidentManagementEnd">
-        <dc:Bounds height="36.0" width="36.0" x="369.0" y="264.0"/>
+        <dc:Bounds height="36.0" width="36.0" x="705.0" y="282.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="17.0" width="129.0" x="659.0" y="323.0"/>
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_2" bpmnElement="SequenceFlow_2" sourceElement="_BPMNShape_ServiceTask_2" targetElement="_BPMNShape_EndEvent_3">
-        <di:waypoint xsi:type="dc:Point" x="319.0" y="282.0"/>
-        <di:waypoint xsi:type="dc:Point" x="369.0" y="282.0"/>
+        <di:waypoint xsi:type="dc:Point" x="664.0" y="221.0"/>
+        <di:waypoint xsi:type="dc:Point" x="723.0" y="221.0"/>
+        <di:waypoint xsi:type="dc:Point" x="723.0" y="282.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="6.0" width="6.0" x="686.0" y="221.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_ExclusiveGateway_3" bpmnElement="ExclusiveGateway_2" isMarkerVisible="true">
+        <dc:Bounds height="50.0" width="50.0" x="482.0" y="275.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_UserTask_3" bpmnElement="UserTask_2">
+        <dc:Bounds height="80.0" width="100.0" x="564.0" y="348.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_13" bpmnElement="WithoutAutomationJob" sourceElement="_BPMNShape_ExclusiveGateway_3" targetElement="_BPMNShape_UserTask_3">
+        <di:waypoint xsi:type="dc:Point" x="507.0" y="325.0"/>
+        <di:waypoint xsi:type="dc:Point" x="507.0" y="388.0"/>
+        <di:waypoint xsi:type="dc:Point" x="564.0" y="388.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="6.0" width="6.0" x="516.0" y="388.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_14" bpmnElement="WithAutomationJob" sourceElement="_BPMNShape_ExclusiveGateway_3" targetElement="_BPMNShape_ServiceTask_2">
+        <di:waypoint xsi:type="dc:Point" x="507.0" y="275.0"/>
+        <di:waypoint xsi:type="dc:Point" x="507.0" y="221.0"/>
+        <di:waypoint xsi:type="dc:Point" x="564.0" y="221.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_15" bpmnElement="SequenceFlow_15" sourceElement="_BPMNShape_UserTask_3" targetElement="_BPMNShape_EndEvent_3">
+        <di:waypoint xsi:type="dc:Point" x="664.0" y="388.0"/>
+        <di:waypoint xsi:type="dc:Point" x="723.0" y="388.0"/>
+        <di:waypoint xsi:type="dc:Point" x="723.0" y="318.0"/>
+        <bpmndi:BPMNLabel>
+          <dc:Bounds height="6.0" width="6.0" x="718.0" y="388.0"/>
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_ServiceTask_5" bpmnElement="PersistIncident">
+        <dc:Bounds height="80.0" width="100.0" x="182.0" y="260.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_1" bpmnElement="SequenceFlow_1" sourceElement="_BPMNShape_StartEvent_6" targetElement="_BPMNShape_ServiceTask_5">
+        <di:waypoint xsi:type="dc:Point" x="132.0" y="300.0"/>
+        <di:waypoint xsi:type="dc:Point" x="182.0" y="300.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_ServiceTask_6" bpmnElement="AnalyzeIncident">
+        <dc:Bounds height="80.0" width="100.0" x="332.0" y="260.0"/>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_3" bpmnElement="SequenceFlow_3" sourceElement="_BPMNShape_ServiceTask_5" targetElement="_BPMNShape_ServiceTask_6">
+        <di:waypoint xsi:type="dc:Point" x="282.0" y="300.0"/>
+        <di:waypoint xsi:type="dc:Point" x="332.0" y="300.0"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_4" bpmnElement="SequenceFlow_4" sourceElement="_BPMNShape_ServiceTask_6" targetElement="_BPMNShape_ExclusiveGateway_3">
+        <di:waypoint xsi:type="dc:Point" x="432.0" y="300.0"/>
+        <di:waypoint xsi:type="dc:Point" x="482.0" y="300.0"/>
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

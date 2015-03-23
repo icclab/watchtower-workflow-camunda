@@ -14,13 +14,14 @@
 package watchtower.workflow.camunda;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -36,31 +37,61 @@ import org.camunda.bpm.engine.runtime.ProcessInstance;
 
 import watchtower.common.event.Event;
 import watchtower.common.incident.Incident;
+import watchtower.common.incident.IncidentStatus;
 import watchtower.common.incident.IncidentUtils;
 
 @Path("/v1.0/workflow")
 public class WatchtowerRestService {
-	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response createWorkflowInstance(@Context UriInfo uriInfo, Event event) {
-		ProcessEngineService processEngineService = 
-			    RuntimeContainerDelegate.INSTANCE.get().getProcessEngineService();
-		
-		ProcessEngine defaultProcessEngine = processEngineService.getDefaultProcessEngine();
+  @POST
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response createWorkflowInstance(@Context UriInfo uriInfo, Event event) {
+    ProcessEngineService processEngineService =
+        RuntimeContainerDelegate.INSTANCE.get().getProcessEngineService();
 
-		RuntimeService runtimeService = defaultProcessEngine.getRuntimeService();
-		
-		List<Event> events = new ArrayList<Event>();
-		events.add(event);
-		
-		Map<String, Object> variables = new HashMap<String, Object>();
-		variables.put("events", events);
+    ProcessEngine defaultProcessEngine = processEngineService.getDefaultProcessEngine();
 
-		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("CloudIncidentManagementWorkflow", variables);
-		
-		Incident incident = new Incident(processInstance.getId(), null, null, null, null, events);
-		
-		return Response.status(Status.OK).entity(IncidentUtils.toJson(incident)).build();
-	}
+    RuntimeService runtimeService = defaultProcessEngine.getRuntimeService();
+
+    List<Event> events = new ArrayList<Event>();
+    events.add(event);
+
+    Map<String, Object> variables = new HashMap<String, Object>();
+    variables.put("events", events);
+
+    ProcessInstance processInstance =
+        runtimeService.startProcessInstanceByKey("CloudIncidentManagementWorkflow", variables);
+
+    Incident incident =
+        new Incident(processInstance.getId(), events.get(0).getMessage(), IncidentStatus.NEW, null,
+            null, null, events, new Date(), new Date(), 0);
+
+    return Response.status(Status.OK).entity(IncidentUtils.toJson(incident)).build();
+  }
+
+  @POST
+  @Path("/job")
+  @Consumes(MediaType.APPLICATION_JSON)
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response retrieveAutomationJob(@Context UriInfo uriInfo) {
+    ProcessEngineService processEngineService =
+        RuntimeContainerDelegate.INSTANCE.get().getProcessEngineService();
+
+    ProcessEngine defaultProcessEngine = processEngineService.getDefaultProcessEngine();
+
+    RuntimeService runtimeService = defaultProcessEngine.getRuntimeService();
+
+    // runtimeService.signal();
+    /**
+     * ProcessInstance pi = runtimeService.startProcessInstanceByKey("processWaitingInReceiveTask");
+     * EventSubscription subscription = runtimeService.createEventSubscriptionQuery()
+     * .processInstanceId(pi.getId()).eventType("message").singleResult();
+     * 
+     * // correlate the message runtimeService.correlateMessage(subscription.getEventName()); // or
+     * receive the event runtimeService.messageEventReceived(subscription.getEventName(),
+     * subscription.getExecutionId());
+     */
+
+    return Response.status(Status.OK).build();
+  }
 }
