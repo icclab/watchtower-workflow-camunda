@@ -1,0 +1,100 @@
+<form name="resolveIncident" role="form">
+	<script cam-script type="text/form-script">
+	$scope.addJob = function() {
+	  if ($scope.incident.jobs === 'undefined')
+		$scope.incident.jobs = [];
+
+	  $scope.incident.jobs.push({});
+	};
+
+	camForm.on('form-loaded', function() {
+      camForm.variableManager.fetchVariable('incident');
+    });
+
+    camForm.on('variables-fetched', function() {
+      $scope.incident = angular.fromJson(camForm.variableManager.variableValue('incident'));
+	  console.log(camForm.variableManager.variables);
+    });
+
+    camForm.on('submit', function() {
+	  delete $scope.incident.$$hashKey;
+	  angular.forEach($scope.incident.events, function(event) {
+        delete event.$$hashKey;
+      });
+      angular.forEach($scope.incident.jobs, function(job) {
+        delete job.$$hashKey;
+      });
+	  camForm.variableManager.variableValue('incident', angular.toJson($scope.incident));
+    });
+	</script>
+
+	<h3>Cloud Incident</h3>
+
+	<p class="lead">Please resolve the following incident</p>
+
+	<div class="control-group">
+		<label class="control-label" for="id">Id</label>
+		<div class="controls">
+			<input id="id" class="form-control disabled" type="text" required
+				ng-model="incident.id">
+		</div>
+	</div>
+
+	<div class="control-group">
+		<label class="control-label" for="id">Summary</label>
+		<div class="controls">
+			<input id="summary" class="form-control" type="text" required
+				ng-model="incident.summary">
+		</div>
+	</div>
+
+	<div class="control-group">
+		<label class="control-label" for="events">Events</label>
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th><strong>Id</strong></th>
+					<th><strong>Name</strong></th>
+					<th><strong>Message</strong></th>
+					<th><strong>Service Model</strong></th>
+					<th><strong>Date</strong></th>
+				</tr>
+			</thead>
+			<tbody class="table-striped table-hover">
+				<tr ng-repeat="event in incident.events">
+					<td>{{event.id}}</td>
+					<td>{{event.name}}</td>
+					<td>{{event.message}}</td>
+					<td>{{event.serviceModel}}</td>
+					<td>{{event.date | date : "d MM y H:mm:ss" : UTC}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<div>
+		<label class="control-label" for="jobs">Jobs</label>
+
+		<div ng-repeat="job in incident.jobs">
+			<hr>
+			<div class="control-group">
+				<label class="control-label" for="jobId">Job Id</label>
+				<div class="controls">
+					<input id="jobId" class="form-control" type="text" required
+						ng-model="job.jobId">
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="name">Name</label>
+				<div class="controls">
+					<input id="name" class="form-control" type="text" required
+						ng-model="job.name">
+				</div>
+			</div>
+		</div>
+		<br>
+		<a href
+			ng-click="addJob()" class="btn btn-default">Add job</a>
+		<br>
+	</div>
+</form>

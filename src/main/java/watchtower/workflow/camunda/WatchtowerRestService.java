@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -35,6 +36,7 @@ import org.camunda.bpm.engine.ProcessEngine;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.runtime.ProcessInstance;
 
+import watchtower.common.automation.JobExecution;
 import watchtower.common.event.Event;
 import watchtower.common.incident.Incident;
 import watchtower.common.incident.IncidentStatus;
@@ -64,16 +66,17 @@ public class WatchtowerRestService {
 
     Incident incident =
         new Incident(processInstance.getId(), events.get(0).getMessage(), IncidentStatus.NEW, null,
-            null, null, events, new Date(), new Date(), 0);
+            null, null, events, null, new Date(), new Date(), 0);
 
     return Response.status(Status.OK).entity(IncidentUtils.toJson(incident)).build();
   }
 
   @POST
-  @Path("/job")
+  @Path("/{workflowInstanceId}")
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
-  public Response retrieveAutomationJob(@Context UriInfo uriInfo) {
+  public Response attachJobExecutionToWorkflowInstance(@Context UriInfo uriInfo,
+      @PathParam("workflowInstanceId") String workflowInstanceId, JobExecution execution) {
     ProcessEngineService processEngineService =
         RuntimeContainerDelegate.INSTANCE.get().getProcessEngineService();
 
@@ -81,16 +84,7 @@ public class WatchtowerRestService {
 
     RuntimeService runtimeService = defaultProcessEngine.getRuntimeService();
 
-    // runtimeService.signal();
-    /**
-     * ProcessInstance pi = runtimeService.startProcessInstanceByKey("processWaitingInReceiveTask");
-     * EventSubscription subscription = runtimeService.createEventSubscriptionQuery()
-     * .processInstanceId(pi.getId()).eventType("message").singleResult();
-     * 
-     * // correlate the message runtimeService.correlateMessage(subscription.getEventName()); // or
-     * receive the event runtimeService.messageEventReceived(subscription.getEventName(),
-     * subscription.getExecutionId());
-     */
+    runtimeService.signal(workflowInstanceId, null, execution, null);
 
     return Response.status(Status.OK).build();
   }

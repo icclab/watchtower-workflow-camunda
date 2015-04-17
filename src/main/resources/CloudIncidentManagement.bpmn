@@ -14,17 +14,22 @@
       <bpmn2:outgoing>SequenceFlow_2</bpmn2:outgoing>
     </bpmn2:serviceTask>
     <bpmn2:sequenceFlow id="SequenceFlow_2" name="" sourceRef="RunAutomationJob" targetRef="IncidentManagementEnd"/>
-    <bpmn2:sequenceFlow id="WithoutAutomationJob" name="Without Automation Job" sourceRef="ExclusiveGateway_2" targetRef="UserTask_2">
+    <bpmn2:sequenceFlow id="WithoutAutomationJob" name="Without Automation Job" sourceRef="ExclusiveGateway_2" targetRef="ResolveCloudIncident">
       <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression">${hasJobs == false}</bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
     <bpmn2:sequenceFlow id="WithAutomationJob" name="With Automation Job" sourceRef="ExclusiveGateway_2" targetRef="RunAutomationJob">
       <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression">${hasJobs == true}</bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
-    <bpmn2:userTask id="UserTask_2">
+    <bpmn2:userTask id="ResolveCloudIncident" camunda:formKey="embedded:app:forms/resolve-incident.html" camunda:candidateGroups="Operators" name="Resolve Cloud Incident">
+      <bpmn2:extensionElements>
+        <camunda:taskListener class="watchtower.workflow.camunda.listener.LoadIncidentListener" event="create"/>
+        <camunda:taskListener class="watchtower.workflow.camunda.listener.SaveIncidentListener" event="complete"/>
+        <camunda:taskListener class="watchtower.workflow.camunda.listener.SendEmailListener" event="assignment"/>
+      </bpmn2:extensionElements>
       <bpmn2:incoming>WithoutAutomationJob</bpmn2:incoming>
       <bpmn2:outgoing>SequenceFlow_15</bpmn2:outgoing>
     </bpmn2:userTask>
-    <bpmn2:sequenceFlow id="SequenceFlow_15" name="" sourceRef="UserTask_2" targetRef="IncidentManagementEnd"/>
+    <bpmn2:sequenceFlow id="SequenceFlow_15" name="" sourceRef="ResolveCloudIncident" targetRef="IncidentManagementEnd"/>
     <bpmn2:endEvent id="IncidentManagementEnd" name="Incident Management End">
       <bpmn2:incoming>SequenceFlow_2</bpmn2:incoming>
       <bpmn2:incoming>SequenceFlow_15</bpmn2:incoming>
@@ -69,7 +74,7 @@
       <bpmndi:BPMNShape id="_BPMNShape_ExclusiveGateway_3" bpmnElement="ExclusiveGateway_2" isMarkerVisible="true">
         <dc:Bounds height="50.0" width="50.0" x="482.0" y="275.0"/>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="_BPMNShape_UserTask_3" bpmnElement="UserTask_2">
+      <bpmndi:BPMNShape id="_BPMNShape_UserTask_3" bpmnElement="ResolveCloudIncident">
         <dc:Bounds height="80.0" width="100.0" x="564.0" y="348.0"/>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="BPMNEdge_SequenceFlow_13" bpmnElement="WithoutAutomationJob" sourceElement="_BPMNShape_ExclusiveGateway_3" targetElement="_BPMNShape_UserTask_3">

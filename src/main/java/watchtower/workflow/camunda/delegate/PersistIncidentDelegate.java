@@ -26,14 +26,25 @@ public class PersistIncidentDelegate implements JavaDelegate {
     Map<String, Object> variables = delegateExecution.getVariables();
 
     Incident incident = new Incident();
+    incident.setId(delegateExecution.getProcessInstanceId());
     incident.setSummary(((List<Event>) variables.get("events")).get(0).getMessage());
     incident.setStatus(IncidentStatus.NEW);
     incident.setDateCreated(new Date());
     incident.setDateLastUpdated(new Date());
 
-    incident.setEvents((List<Event>) variables.get("events"));
-
     entityManager.persist(incident);
+    entityManager.flush();
+
+    List<Event> events = (List<Event>) variables.get("events");
+
+    if (events != null)
+      for (Event event : events) {
+        event.setIncidentId(incident.getId());
+      }
+
+    incident.setEvents(events);
+
+    entityManager.merge(incident);
     entityManager.flush();
 
     delegateExecution.removeVariables(variables.keySet());

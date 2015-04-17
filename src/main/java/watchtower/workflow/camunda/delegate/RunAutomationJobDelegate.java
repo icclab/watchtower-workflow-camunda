@@ -20,12 +20,13 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.ws.rs.core.MediaType;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.camunda.bpm.engine.impl.bpmn.behavior.AbstractBpmnActivityBehavior;
+import org.camunda.bpm.engine.impl.pvm.delegate.ActivityExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import watchtower.common.automation.Job;
+import watchtower.common.automation.JobExecution;
 import watchtower.common.automation.JobUtils;
 import watchtower.common.incident.Incident;
 
@@ -33,24 +34,26 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 
-public class RunAutomationJobDelegate implements JavaDelegate {
+public class RunAutomationJobDelegate extends AbstractBpmnActivityBehavior {
   private static final Logger logger = LoggerFactory.getLogger(RunAutomationJobDelegate.class);
 
-  public void execute(DelegateExecution delegateExecution) throws Exception {
+  public void execute(final ActivityExecution execution) throws Exception {
     EntityManagerFactory entityManagerFactory =
         Persistence.createEntityManagerFactory("CloudIncidentManagement");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
     entityManager.getTransaction().begin();
 
-    Map<String, Object> variables = delegateExecution.getVariables();
+    Map<String, Object> variables = execution.getVariables();
 
     Incident currentIncident =
         entityManager.find(Incident.class, (String) variables.get("incidentId"));
 
+    logger.info("Running automation jobs for {}", currentIncident);
+
     for (Job job : currentIncident.getJobs()) {
       Client client = Client.create();
 
-      WebResource webResource = client.resource("http://watchtower:9010/v1.0/jobs");
+      WebResource webResource = client.resource("http://watchtower:9000/v1.0/jobs");
 
       ClientResponse response =
           webResource.type(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
@@ -64,5 +67,33 @@ public class RunAutomationJobDelegate implements JavaDelegate {
 
     entityManager.getTransaction().commit();
     entityManager.close();
+  }
+
+  @Override
+  public void signal(ActivityExecution execution, String signalName, Object signalData)
+      throws Exception {
+    EntityManagerFactory entityManagerFactory =
+        Persistence.createEntityManagerFactory("CloudIncidentManagement");
+    EntityManager entityManager = entityManagerFactory.createEntityManager();
+    entityManager.getTransaction().begin();
+
+    if (!(signalData instanceof JobExecution)) {
+      logger.error("Got something which is not a job execution {}", signalData);
+
+      return;
+    }
+
+    JobExecution jobExecution = (JobExecution) signalData;
+
+    Job currentJob = entityManager.find(Job.class, jobExecution.getJobId());
+
+    currentJob.addExecution(jobExecution);
+
+    entityManager.merge(currentJob);
+
+    entityManager.getTransaction().commit();
+    entityManager.close();
+
+    leave(execution);
   }
 }
