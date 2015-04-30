@@ -4,7 +4,7 @@
 
 	<groupId>watchtower</groupId>
 	<artifactId>watchtower-workflow-camunda</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>war</packaging>
 
 	<name>watchtower-workflow-camunda</name>
@@ -30,7 +30,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<watchtower.common.version>1.0.0</watchtower.common.version>
+		<watchtower.common.version>1.0.1-SNAPSHOT</watchtower.common.version>
 		<mysql.version>5.1.34</mysql.version>
 		<ejb.version>3.0</ejb.version>
 		<persistence.version>1.0</persistence.version>
