@@ -8,6 +8,12 @@
 
 **watchtower-workflow-camunda** is a component of **watchtower** which is deployed onto Camunda and contains both the BPM workflow and the REST service to which **watchtower-workflow** connects.
 
+## Workflow
+
+**watchtower-workflow-camunda** is built around the following BPM workflow:
+
+![Cloud Incident Management Workflow] (https://raw.githubusercontent.com/icclab/watchtower-workflow-camunda/master/src/main/resources/CloudIncidentManagement.png)
+
 ## General Instructions
 
 ### Building
