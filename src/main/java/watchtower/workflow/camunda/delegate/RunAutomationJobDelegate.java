@@ -29,6 +29,7 @@ import watchtower.common.automation.Job;
 import watchtower.common.automation.JobExecution;
 import watchtower.common.automation.JobUtils;
 import watchtower.common.incident.Incident;
+import watchtower.workflow.camunda.configuration.WatchtowerWorkflowCamundaConfiguration;
 
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
@@ -39,7 +40,7 @@ public class RunAutomationJobDelegate extends AbstractBpmnActivityBehavior {
 
   public void execute(final ActivityExecution execution) throws Exception {
     EntityManagerFactory entityManagerFactory =
-        Persistence.createEntityManagerFactory("CloudIncidentManagement");
+        Persistence.createEntityManagerFactory("Watchtower");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
     entityManager.getTransaction().begin();
 
@@ -50,10 +51,13 @@ public class RunAutomationJobDelegate extends AbstractBpmnActivityBehavior {
 
     logger.info("Running automation jobs for {}", currentIncident);
 
+    String endpoint = WatchtowerWorkflowCamundaConfiguration.getInstance().getEndpoint();
+
     for (Job job : currentIncident.getJobs()) {
       Client client = Client.create();
 
-      WebResource webResource = client.resource("http://watchtower:9000/v1.0/jobs");
+
+      WebResource webResource = client.resource(endpoint);
 
       ClientResponse response =
           webResource.type(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON)
@@ -73,7 +77,7 @@ public class RunAutomationJobDelegate extends AbstractBpmnActivityBehavior {
   public void signal(ActivityExecution execution, String signalName, Object signalData)
       throws Exception {
     EntityManagerFactory entityManagerFactory =
-        Persistence.createEntityManagerFactory("CloudIncidentManagement");
+        Persistence.createEntityManagerFactory("Watchtower");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
     entityManager.getTransaction().begin();
 

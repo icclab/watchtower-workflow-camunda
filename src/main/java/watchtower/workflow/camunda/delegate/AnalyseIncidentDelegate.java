@@ -23,7 +23,7 @@ public class AnalyseIncidentDelegate implements JavaDelegate {
 
   public void execute(DelegateExecution delegateExecution) throws Exception {
     EntityManagerFactory entityManagerFactory =
-        Persistence.createEntityManagerFactory("CloudIncidentManagement");
+        Persistence.createEntityManagerFactory("Watchtower");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
     entityManager.getTransaction().begin();
 

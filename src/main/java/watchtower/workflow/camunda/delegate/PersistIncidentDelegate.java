@@ -10,16 +10,21 @@ import javax.persistence.Persistence;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import watchtower.common.event.Event;
 import watchtower.common.incident.Incident;
 import watchtower.common.incident.IncidentStatus;
 
 public class PersistIncidentDelegate implements JavaDelegate {
+  private static final Logger logger = LoggerFactory.getLogger(PersistIncidentDelegate.class);
 
   public void execute(DelegateExecution delegateExecution) throws Exception {
+    logger.info("Preparing to persist new incident");
+
     EntityManagerFactory entityManagerFactory =
-        Persistence.createEntityManagerFactory("CloudIncidentManagement");
+        Persistence.createEntityManagerFactory("Watchtower");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
     entityManager.getTransaction().begin();
 
@@ -32,9 +37,6 @@ public class PersistIncidentDelegate implements JavaDelegate {
     incident.setDateCreated(new Date());
     incident.setDateLastUpdated(new Date());
 
-    entityManager.persist(incident);
-    entityManager.flush();
-
     List<Event> events = (List<Event>) variables.get("events");
 
     if (events != null)
@@ -44,7 +46,9 @@ public class PersistIncidentDelegate implements JavaDelegate {
 
     incident.setEvents(events);
 
-    entityManager.merge(incident);
+    logger.info("Persisting {}", incident.toString());
+
+    entityManager.persist(incident);
     entityManager.flush();
 
     delegateExecution.removeVariables(variables.keySet());

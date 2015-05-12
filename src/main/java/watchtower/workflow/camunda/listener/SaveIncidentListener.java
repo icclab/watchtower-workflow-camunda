@@ -17,7 +17,7 @@ public class SaveIncidentListener implements TaskListener {
 
   public void notify(DelegateTask delegateTask) {
     EntityManagerFactory entityManagerFactory =
-        Persistence.createEntityManagerFactory("CloudIncidentManagement");
+        Persistence.createEntityManagerFactory("Watchtower");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
     entityManager.getTransaction().begin();
 

@@ -43,7 +43,7 @@ import watchtower.common.incident.IncidentStatus;
 import watchtower.common.incident.IncidentUtils;
 
 @Path("/v1.0/workflow")
-public class WatchtowerRestService {
+public class WatchtowerWorkflowRestService {
   @POST
   @Consumes(MediaType.APPLICATION_JSON)
   @Produces(MediaType.APPLICATION_JSON)
@@ -62,7 +62,7 @@ public class WatchtowerRestService {
     variables.put("events", events);
 
     ProcessInstance processInstance =
-        runtimeService.startProcessInstanceByKey("CloudIncidentManagementWorkflow", variables);
+        runtimeService.startProcessInstanceByKey("WatchtowerWorkflow", variables);
 
     Incident incident =
         new Incident(processInstance.getId(), events.get(0).getMessage(), IncidentStatus.NEW, null,
