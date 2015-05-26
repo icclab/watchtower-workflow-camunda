@@ -38,6 +38,10 @@
 		<camunda.version>7.2.0</camunda.version>
 		<jersey.version>1.19</jersey.version>
 		<slf4j.version>1.7.10</slf4j.version>
+		<mockito.version>1.9.5</mockito.version>
+		<junit.version>4.12</junit.version>
+		<maven.jacoco.version>0.7.4.201502262128</maven.jacoco.version>
+		<maven.coveralls.version>3.1.0</maven.coveralls.version>
 	</properties>
 
 	<scm>
@@ -82,7 +86,6 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>${mysql.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.camunda.bpm</groupId>
 			<artifactId>camunda-engine</artifactId>
@@ -156,9 +159,15 @@
 			<version>${slf4j.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>${mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>3.8.1</version>
+			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -184,6 +193,24 @@
 				<configuration>
 					<failOnMissingWebXml>false</failOnMissingWebXml>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${maven.jacoco.version}</version>
+				<executions>
+					<execution>
+						<id>prepare-agent</id>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.eluder.coveralls</groupId>
+				<artifactId>coveralls-maven-plugin</artifactId>
+				<version>${maven.coveralls.version}</version>
 			</plugin>
 		</plugins>
 	</build>

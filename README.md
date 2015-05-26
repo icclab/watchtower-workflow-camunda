@@ -4,6 +4,9 @@
 	<img src="https://raw.githubusercontent.com/icclab/watchtower-common/master/watchtower.png" alt="Watchtower" title="Watchtower">
 </div>
 
+[![Build Status](https://travis-ci.org/icclab/watchtower-workflow-camunda.svg?branch=master)](https://travis-ci.org/icclab/watchtower-workflow-camunda)
+[![Coverage Status](https://coveralls.io/repos/icclab/watchtower-workflow-camunda/badge.svg?branch=master)](https://coveralls.io/r/icclab/watchtower-workflow-camunda?branch=master)
+
 # Overview
 
 **watchtower-workflow-camunda** is a component of **watchtower** which is deployed onto Camunda and contains both the BPM workflow and the REST service to which **watchtower-workflow** connects.
